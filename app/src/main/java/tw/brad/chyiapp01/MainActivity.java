@@ -2,10 +2,13 @@ package tw.brad.chyiapp01;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -19,11 +22,15 @@ public class MainActivity extends AppCompatActivity {
 
     private String inputAccount, inputPasswd;
 
+    private UIHandler handler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        handler = new UIHandler();
 
         account = (EditText)findViewById(R.id.account);
         passwd = (EditText)findViewById(R.id.passwd);
@@ -66,10 +73,14 @@ public class MainActivity extends AppCompatActivity {
     private void parseJSON(String json){
         // {} ==> JSONObject
         // [] ==> JSONArray
+
+//        json = "{\"success\":\"false\",\"error\":\"\"}";
+        json = "{\"success\":false,\"error\":\"\"}";
+        Log.i("brad", json);
         try {
             JSONObject root = new JSONObject(json);
             boolean isOK = root.getBoolean("success");
-            // "key":value ==> "key":true ==> boolean
+//            // "key":value ==> "key":true ==> boolean
             if (isOK){
                 speditor.putString("account", inputAccount);
                 speditor.putString("passwd", inputPasswd);
@@ -79,10 +90,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(it);
                 finish();
             }else{
-                Log.i("brad", "Login Fail");
+                handler.sendEmptyMessage(0);
             }
         }catch(Exception e){
-            Log.i("brad", "JSON Format error");
+            Log.i("brad", e.toString());
+        }
+    }
+
+    private class UIHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Toast.makeText(MainActivity.this, "Login ERROTR", Toast.LENGTH_SHORT).show();
         }
     }
 
